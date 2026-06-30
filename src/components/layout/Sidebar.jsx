@@ -1,86 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { X, ChevronRight, ChevronDown, ChevronUp, FileSpreadsheet, Layers } from 'lucide-react'
-
-// Known categories with clean display names and icons
-const KNOWN_CATEGORIES = [
-  'Object Detection',
-  'Image Classification',
-  'Semantic Segmentation',
-  'Instance Segmentation',
-  'Face Recognition',
-  'Image Generation',
-  'Depth Estimation',
-  'OCR',
-  'Document Understanding',
-  'Text Classification',
-  'Named Entity Recognition',
-  'Question Answering',
-  'Text Generation',
-  'Translation',
-  'Summarization',
-  'Sentiment Analysis',
-  'Visual QA',
-  'Image Captioning',
-  'Speech Recognition',
-  'Speaker Identification',
-  'Audio Classification',
-  'LoRA / QLoRA',
-  'Full Fine-tune',
-  'Adapter Tuning',
-  'RLHF',
-  'DPO',
-  'Instruction Tuning',
-  'Domain Adaptation',
-]
-
-/**
- * Normalize a category string to match a known category.
- * Handles messy freeform text like "OCR, document parsing" → "OCR"
- */
-function normalizeCategory(raw) {
-  if (!raw || raw === 'Uncategorized') return 'Uncategorized'
-  
-  const lower = raw.toLowerCase().trim()
-  
-  // Direct match
-  const directMatch = KNOWN_CATEGORIES.find(k => k.toLowerCase() === lower)
-  if (directMatch) return directMatch
-
-  // Partial match — if the raw category starts with or contains a known category
-  for (const known of KNOWN_CATEGORIES) {
-    const knownLower = known.toLowerCase()
-    if (lower.startsWith(knownLower) || lower.includes(knownLower)) {
-      return known
-    }
-    // Also check if known starts with the raw (e.g. "obj" → "Object Detection")
-    if (knownLower.startsWith(lower)) {
-      return known
-    }
-  }
-
-  // Check common abbreviations
-  const abbrevMap = {
-    'ocr': 'OCR',
-    'obj': 'Object Detection',
-    'seg': 'Semantic Segmentation',
-    'cls': 'Image Classification',
-    'det': 'Object Detection',
-    'gen': 'Image Generation',
-    'qa': 'Question Answering',
-    'ner': 'Named Entity Recognition',
-    'asr': 'Speech Recognition',
-    'multimodal extraction': 'OCR',
-    'multimodal': 'Visual QA',
-  }
-  
-  for (const [abbr, full] of Object.entries(abbrevMap)) {
-    if (lower.includes(abbr)) return full
-  }
-
-  // Fallback — capitalize first letter
-  return raw.charAt(0).toUpperCase() + raw.slice(1)
-}
+import { X, ChevronRight, ChevronDown, ChevronUp, Layers } from 'lucide-react'
+import { normalizeCategory, KNOWN_CATEGORIES } from '../../utils/categories'
 
 export default function Sidebar({ models, open, onClose }) {
   const location = useLocation()
@@ -236,21 +157,13 @@ export default function Sidebar({ models, open, onClose }) {
       </div>
 
       {/* Add new */}
-      <div className="shrink-0 p-3 border-t border-white/[0.08] space-y-2">
+      <div className="shrink-0 p-3 border-t border-white/[0.08]">
         <Link
           to="/add"
           onClick={onClose}
           className="btn-primary w-full text-sm text-center block"
         >
           + Add Benchmark
-        </Link>
-        <Link
-          to="/bulk-import"
-          onClick={onClose}
-          className="btn-secondary w-full text-sm text-center flex items-center justify-center gap-2"
-        >
-          <FileSpreadsheet size={14} />
-          Bulk Import
         </Link>
       </div>
     </aside>

@@ -1,19 +1,23 @@
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
-  BarChart2, Plus, MessageSquare, Menu, Trophy,
-  X, FileSpreadsheet, Download, LogOut, ChevronDown, User,
+  BarChart2, MessageSquare, Menu, Trophy,
+  X, Download, LogOut, ChevronDown, User,
 } from 'lucide-react'
 import { logOut } from '../../services/authService'
 import { getAllDataForExport } from '../../services/benchmarkService'
-import { downloadTemplate, TEMPLATE_COLUMNS } from '../../pages/BulkImportPage'
 import * as XLSX from 'xlsx'
+
+const EXPORT_HEADERS = [
+  'Model Name', 'Type', 'Category', 'Creator', 'Description', 'Model Tags',
+  'Latency (ms)', 'Accuracy (%)', 'Dataset', 'Dataset Type', 'Hardware',
+  'Architecture Understanding', 'Added By', 'Benchmark Tags', 'Notes',
+]
 
 async function exportAllData() {
   const rows = await getAllDataForExport()
   if (!rows.length) { alert('No data to export yet.'); return }
 
-  const headers = TEMPLATE_COLUMNS.map(c => c.label)
   const dataRows = rows.map(({ model, benchmark: b }) => {
     const get = (key, src) => src?.[key] ?? ''
     return [
@@ -35,9 +39,9 @@ async function exportAllData() {
     ]
   })
 
-  const wsData = [headers, ...dataRows]
+  const wsData = [EXPORT_HEADERS, ...dataRows]
   const ws = XLSX.utils.aoa_to_sheet(wsData)
-  ws['!cols'] = TEMPLATE_COLUMNS.map(c => ({ wch: Math.max(c.label.length + 4, 20) }))
+  ws['!cols'] = EXPORT_HEADERS.map(h => ({ wch: Math.max(h.length + 4, 20) }))
 
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, 'All Benchmarks')
@@ -52,8 +56,6 @@ export default function Navbar({ user, onMenuToggle, onChatToggle, chatOpen }) {
   const navLinks = [
     { to: '/',            label: 'Dashboard',      icon: BarChart2 },
     { to: '/leaderboard', label: 'Leaderboard',    icon: Trophy    },
-    { to: '/add',         label: 'Add Benchmark',  icon: Plus      },
-    { to: '/bulk-import', label: 'Bulk Import',    icon: FileSpreadsheet },
   ]
 
   async function handleExport() {
@@ -111,17 +113,6 @@ export default function Navbar({ user, onMenuToggle, onChatToggle, chatOpen }) {
 
         <div className="flex-1" />
 
-        {/* Export button */}
-        <button
-          onClick={handleExport}
-          disabled={exporting}
-          className="btn-secondary text-sm hidden sm:flex items-center gap-2"
-          title="Export all data to Excel"
-        >
-          <Download size={14} />
-          <span className="hidden md:inline">{exporting ? 'Exporting…' : 'Export'}</span>
-        </button>
-
         {/* Chat toggle */}
         <button
           onClick={onChatToggle}
@@ -168,13 +159,6 @@ export default function Navbar({ user, onMenuToggle, onChatToggle, chatOpen }) {
                 >
                   <Download size={14} />
                   {exporting ? 'Exporting…' : 'Export All Data'}
-                </button>
-                <button
-                  onClick={downloadTemplate}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:text-gray-200 hover:bg-white/[0.06] transition-colors"
-                >
-                  <FileSpreadsheet size={14} />
-                  Download Template
                 </button>
                 <div className="border-t border-white/[0.08]" />
                 <button

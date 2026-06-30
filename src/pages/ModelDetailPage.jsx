@@ -226,7 +226,19 @@ function BenchmarkRunCard({ benchmark: b, index, expanded, onToggle, onEdit, mod
             )}
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
+            {/* Created by */}
+            {b.addedBy && (
+              <span className="text-xs text-gray-500 hidden md:inline" title={`Created by ${b.addedBy}`}>
+                by <span className="text-gray-400">{b.addedBy}</span>
+              </span>
+            )}
+            {/* Modified by */}
+            {b.lastEditedBy && (
+              <span className="text-xs text-orange-400/60 hidden lg:inline" title={`Modified by ${b.lastEditedBy}`}>
+                · edited by <span className="text-orange-300/80">{b.lastEditedBy}</span>
+              </span>
+            )}
             <span className="text-xs text-gray-600">{date}</span>
             {expanded ? <ChevronUp size={15} className="text-gray-500" /> : <ChevronDown size={15} className="text-gray-500" />}
           </div>
@@ -260,6 +272,17 @@ function BenchmarkRunCard({ benchmark: b, index, expanded, onToggle, onEdit, mod
               <p className="text-gray-300 bg-gray-800 rounded-lg p-3 text-xs leading-relaxed whitespace-pre-wrap">
                 {b.architectureUnderstanding}
               </p>
+            </div>
+          )}
+
+          {b.inferenceCode && (
+            <div>
+              <p className="text-xs text-gray-500 mb-1 flex items-center gap-1">
+                <code className="text-brand-400">&lt;/&gt;</code> Inference Code
+              </p>
+              <pre className="text-gray-300 bg-gray-900/80 border border-white/[0.08] rounded-lg p-3 text-xs leading-relaxed overflow-x-auto font-mono whitespace-pre-wrap">
+                {b.inferenceCode}
+              </pre>
             </div>
           )}
 

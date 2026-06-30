@@ -96,6 +96,14 @@
            transition-all duration-200 w-full backdrop-blur-sm;
   }
 
+  select.input {
+    @apply bg-[#1a1a2e] border-white/[0.1];
+  }
+
+  select.input option {
+    @apply bg-[#1a1a2e] text-gray-100;
+  }
+
   .label {
     @apply text-sm font-medium text-gray-300 mb-1.5 block;
   }

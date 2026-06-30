@@ -8,7 +8,6 @@ import HomePage from './pages/HomePage'
 import ModelDetailPage from './pages/ModelDetailPage'
 import AddBenchmarkPage from './pages/AddBenchmarkPage'
 import LeaderboardPage from './pages/LeaderboardPage'
-import BulkImportPage from './pages/BulkImportPage'
 import AuthPage from './pages/AuthPage'
 import { subscribeToModels } from './services/benchmarkService'
 import { subscribeToAuth } from './services/authService'
@@ -88,7 +87,6 @@ export default function App() {
               <Route path="/"            element={<HomePage models={models} />} />
               <Route path="/leaderboard" element={<LeaderboardPage models={models} />} />
               <Route path="/add"         element={<AddBenchmarkPage models={models} />} />
-              <Route path="/bulk-import" element={<BulkImportPage models={models} />} />
               <Route path="/model/:slug" element={<ModelDetailPage models={models} />} />
             </Routes>
           </div>

@@ -1,12 +1,15 @@
 import React, { useEffect, useRef } from 'react'
 
 /**
- * Animated background with floating neural network nodes,
- * connecting lines, and pulsing data points — themed around
- * AI model benchmarking.
+ * Interactive animated background — "Data Flow Grid"
+ * 
+ * A futuristic grid with glowing data streams that flow along paths,
+ * pulse at intersections, and react to mouse movement.
+ * Inspired by circuit boards and real-time data pipelines.
  */
 export default function AnimatedBackground() {
   const canvasRef = useRef(null)
+  const mouseRef = useRef({ x: -1000, y: -1000 })
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -14,140 +17,253 @@ export default function AnimatedBackground() {
 
     const ctx = canvas.getContext('2d')
     let animationId
-    let nodes = []
-    let particles = []
+    let time = 0
+
+    // Grid configuration
+    const CELL_SIZE = 60
+    let cols, rows, gridNodes = [], streams = [], pulses = []
 
     function resize() {
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
-    }
-    resize()
-    window.addEventListener('resize', resize)
-
-    // Create nodes (neural network style)
-    const NODE_COUNT = 55
-    for (let i = 0; i < NODE_COUNT; i++) {
-      nodes.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
-        radius: Math.random() * 2.5 + 1.5,
-        pulse: Math.random() * Math.PI * 2,
-        type: Math.random() > 0.6 ? 'accent' : 'normal', // more accent nodes
-      })
+      cols = Math.ceil(canvas.width / CELL_SIZE) + 1
+      rows = Math.ceil(canvas.height / CELL_SIZE) + 1
+      initGrid()
     }
 
-    // Create small data particles that travel between nodes
-    const PARTICLE_COUNT = 15
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      particles.push(createParticle())
-    }
-
-    function createParticle() {
-      const startNode = nodes[Math.floor(Math.random() * nodes.length)]
-      const endNode = nodes[Math.floor(Math.random() * nodes.length)]
-      return {
-        x: startNode.x,
-        y: startNode.y,
-        targetX: endNode.x,
-        targetY: endNode.y,
-        progress: 0,
-        speed: Math.random() * 0.008 + 0.003,
-        startX: startNode.x,
-        startY: startNode.y,
-      }
-    }
-
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-      // Draw connections between nearby nodes
-      const CONNECTION_DIST = 220
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const dx = nodes[i].x - nodes[j].x
-          const dy = nodes[i].y - nodes[j].y
-          const dist = Math.sqrt(dx * dx + dy * dy)
-          if (dist < CONNECTION_DIST) {
-            const opacity = (1 - dist / CONNECTION_DIST) * 0.25
-            ctx.beginPath()
-            ctx.moveTo(nodes[i].x, nodes[i].y)
-            ctx.lineTo(nodes[j].x, nodes[j].y)
-            ctx.strokeStyle = nodes[i].type === 'accent' || nodes[j].type === 'accent'
-              ? `rgba(139, 92, 246, ${opacity})`
-              : `rgba(116, 133, 255, ${opacity})`
-            ctx.lineWidth = 0.8
-            ctx.stroke()
-          }
+    function initGrid() {
+      gridNodes = []
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          // Only some intersections are "active"
+          if (Math.random() > 0.3) continue
+          gridNodes.push({
+            x: c * CELL_SIZE,
+            y: r * CELL_SIZE,
+            col: c,
+            row: r,
+            energy: Math.random(),
+            phase: Math.random() * Math.PI * 2,
+            size: Math.random() * 2 + 1,
+            type: Math.random() > 0.85 ? 'hub' : 'node', // hubs are brighter
+          })
         }
       }
 
-      // Draw and update nodes
-      for (const node of nodes) {
-        // Move
-        node.x += node.vx
-        node.y += node.vy
-        node.pulse += 0.02
+      // Create data streams — paths that data flows along
+      streams = []
+      for (let i = 0; i < 20; i++) {
+        streams.push(createStream())
+      }
+    }
 
-        // Bounce off edges
-        if (node.x < 0 || node.x > canvas.width) node.vx *= -1
-        if (node.y < 0 || node.y > canvas.height) node.vy *= -1
+    function createStream() {
+      const isHorizontal = Math.random() > 0.4
+      const row = Math.floor(Math.random() * rows)
+      const col = Math.floor(Math.random() * cols)
+      const length = Math.floor(Math.random() * 8) + 4
+      const speed = Math.random() * 1.5 + 0.5
+      const color = Math.random() > 0.6 
+        ? { r: 139, g: 92, b: 246 }   // purple
+        : Math.random() > 0.5
+        ? { r: 79, g: 94, b: 255 }    // blue
+        : { r: 59, g: 200, b: 246 }   // cyan
 
-        // Draw node
-        const pulseScale = 1 + Math.sin(node.pulse) * 0.3
-        const r = node.radius * pulseScale
+      return {
+        x: col * CELL_SIZE,
+        y: row * CELL_SIZE,
+        isHorizontal,
+        length: length * CELL_SIZE,
+        speed,
+        progress: Math.random() * 100,
+        color,
+        width: Math.random() * 1.5 + 0.5,
+        life: 0,
+        maxLife: 300 + Math.random() * 400,
+      }
+    }
 
-        if (node.type === 'accent') {
-          // Accent nodes glow purple/blue — bigger and brighter
-          const gradient = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, r * 6)
-          gradient.addColorStop(0, 'rgba(139, 92, 246, 0.8)')
-          gradient.addColorStop(0.3, 'rgba(139, 92, 246, 0.2)')
-          gradient.addColorStop(0.6, 'rgba(139, 92, 246, 0.05)')
-          gradient.addColorStop(1, 'rgba(139, 92, 246, 0)')
+    function createPulse(x, y) {
+      pulses.push({
+        x, y,
+        radius: 0,
+        maxRadius: 40 + Math.random() * 30,
+        alpha: 0.6,
+        speed: 1 + Math.random(),
+      })
+    }
+
+    function handleMouseMove(e) {
+      mouseRef.current = { x: e.clientX, y: e.clientY }
+    }
+
+    function handleClick(e) {
+      // Create burst of pulses on click
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => createPulse(e.clientX, e.clientY), i * 100)
+      }
+    }
+
+    window.addEventListener('resize', resize)
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('click', handleClick)
+    resize()
+
+    function draw() {
+      time += 0.016 // ~60fps
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      const mouse = mouseRef.current
+
+      // ─── Draw subtle grid lines ────────────────────────────────────────
+      ctx.strokeStyle = 'rgba(116, 133, 255, 0.03)'
+      ctx.lineWidth = 0.5
+      for (let c = 0; c <= cols; c++) {
+        ctx.beginPath()
+        ctx.moveTo(c * CELL_SIZE, 0)
+        ctx.lineTo(c * CELL_SIZE, canvas.height)
+        ctx.stroke()
+      }
+      for (let r = 0; r <= rows; r++) {
+        ctx.beginPath()
+        ctx.moveTo(0, r * CELL_SIZE)
+        ctx.lineTo(canvas.width, r * CELL_SIZE)
+        ctx.stroke()
+      }
+
+      // ─── Draw grid nodes ───────────────────────────────────────────────
+      for (const node of gridNodes) {
+        const dx = mouse.x - node.x
+        const dy = mouse.y - node.y
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        const mouseInfluence = Math.max(0, 1 - dist / 200)
+
+        const pulse = Math.sin(time * 2 + node.phase) * 0.5 + 0.5
+        const baseAlpha = node.type === 'hub' ? 0.4 : 0.15
+        const alpha = baseAlpha + pulse * 0.2 + mouseInfluence * 0.5
+
+        const r = node.size + mouseInfluence * 3
+
+        if (node.type === 'hub' || mouseInfluence > 0.3) {
+          // Glow
+          const gradient = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, r * 5)
+          gradient.addColorStop(0, `rgba(139, 92, 246, ${alpha * 0.4})`)
+          gradient.addColorStop(0.5, `rgba(79, 94, 255, ${alpha * 0.1})`)
+          gradient.addColorStop(1, 'rgba(79, 94, 255, 0)')
           ctx.beginPath()
-          ctx.arc(node.x, node.y, r * 6, 0, Math.PI * 2)
+          ctx.arc(node.x, node.y, r * 5, 0, Math.PI * 2)
           ctx.fillStyle = gradient
           ctx.fill()
         }
 
+        // Core dot
         ctx.beginPath()
         ctx.arc(node.x, node.y, r, 0, Math.PI * 2)
-        ctx.fillStyle = node.type === 'accent'
-          ? `rgba(139, 92, 246, ${0.8 + Math.sin(node.pulse) * 0.2})`
-          : `rgba(116, 133, 255, ${0.5 + Math.sin(node.pulse) * 0.2})`
+        ctx.fillStyle = node.type === 'hub'
+          ? `rgba(139, 92, 246, ${alpha})`
+          : `rgba(116, 133, 255, ${alpha})`
         ctx.fill()
+
+        // Draw connections to nearby mouse
+        if (mouseInfluence > 0.2) {
+          ctx.beginPath()
+          ctx.moveTo(node.x, node.y)
+          ctx.lineTo(mouse.x, mouse.y)
+          ctx.strokeStyle = `rgba(139, 92, 246, ${mouseInfluence * 0.15})`
+          ctx.lineWidth = 0.5
+          ctx.stroke()
+        }
       }
 
-      // Draw data particles traveling between nodes
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i]
-        p.progress += p.speed
+      // ─── Draw data streams ─────────────────────────────────────────────
+      for (let i = 0; i < streams.length; i++) {
+        const s = streams[i]
+        s.life++
+        s.progress += s.speed
 
-        if (p.progress >= 1) {
-          particles[i] = createParticle()
+        // Respawn dead streams
+        if (s.life > s.maxLife) {
+          streams[i] = createStream()
           continue
         }
 
-        // Lerp position
-        p.x = p.startX + (p.targetX - p.startX) * p.progress
-        p.y = p.startY + (p.targetY - p.startY) * p.progress
+        const fadeIn = Math.min(s.life / 30, 1)
+        const fadeOut = Math.max(0, 1 - (s.life - s.maxLife + 60) / 60)
+        const lifeFade = Math.min(fadeIn, fadeOut)
 
-        // Draw particle with trail
-        const alpha = Math.sin(p.progress * Math.PI) * 1.0
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(79, 94, 255, ${alpha})`
-        ctx.fill()
+        // Draw the stream as a moving gradient segment
+        const segmentLength = 80
+        const headPos = s.progress % (s.length + segmentLength * 2) - segmentLength
 
-        // Bright glow
-        const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 12)
-        glow.addColorStop(0, `rgba(116, 133, 255, ${alpha * 0.6})`)
-        glow.addColorStop(0.5, `rgba(116, 133, 255, ${alpha * 0.15})`)
-        glow.addColorStop(1, 'rgba(116, 133, 255, 0)')
+        for (let j = 0; j < segmentLength; j += 2) {
+          const pos = headPos - j
+          if (pos < 0 || pos > s.length) continue
+
+          const alpha = (1 - j / segmentLength) * 0.7 * lifeFade
+          const px = s.isHorizontal ? s.x + pos : s.x
+          const py = s.isHorizontal ? s.y : s.y + pos
+
+          // Check if on screen
+          if (px < -10 || px > canvas.width + 10 || py < -10 || py > canvas.height + 10) continue
+
+          ctx.beginPath()
+          ctx.arc(px, py, s.width, 0, Math.PI * 2)
+          ctx.fillStyle = `rgba(${s.color.r}, ${s.color.g}, ${s.color.b}, ${alpha})`
+          ctx.fill()
+        }
+
+        // Bright head
+        const hx = s.isHorizontal ? s.x + (headPos % s.length) : s.x
+        const hy = s.isHorizontal ? s.y : s.y + (headPos % s.length)
+        if (hx > 0 && hx < canvas.width && hy > 0 && hy < canvas.height) {
+          const headGlow = ctx.createRadialGradient(hx, hy, 0, hx, hy, 8)
+          headGlow.addColorStop(0, `rgba(${s.color.r}, ${s.color.g}, ${s.color.b}, ${0.8 * lifeFade})`)
+          headGlow.addColorStop(1, `rgba(${s.color.r}, ${s.color.g}, ${s.color.b}, 0)`)
+          ctx.beginPath()
+          ctx.arc(hx, hy, 8, 0, Math.PI * 2)
+          ctx.fillStyle = headGlow
+          ctx.fill()
+        }
+      }
+
+      // ─── Draw pulses (mouse interaction) ───────────────────────────────
+      for (let i = pulses.length - 1; i >= 0; i--) {
+        const p = pulses[i]
+        p.radius += p.speed
+        p.alpha -= 0.012
+
+        if (p.alpha <= 0) {
+          pulses.splice(i, 1)
+          continue
+        }
+
         ctx.beginPath()
-        ctx.arc(p.x, p.y, 12, 0, Math.PI * 2)
-        ctx.fillStyle = glow
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2)
+        ctx.strokeStyle = `rgba(139, 92, 246, ${p.alpha})`
+        ctx.lineWidth = 1.5
+        ctx.stroke()
+
+        // Inner glow ring
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.radius * 0.6, 0, Math.PI * 2)
+        ctx.strokeStyle = `rgba(79, 94, 255, ${p.alpha * 0.5})`
+        ctx.lineWidth = 0.8
+        ctx.stroke()
+      }
+
+      // ─── Ambient floating orbs ─────────────────────────────────────────
+      for (let i = 0; i < 5; i++) {
+        const x = (Math.sin(time * 0.3 + i * 1.5) * 0.5 + 0.5) * canvas.width
+        const y = (Math.cos(time * 0.2 + i * 2.1) * 0.5 + 0.5) * canvas.height
+        const r = 60 + Math.sin(time + i) * 20
+
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, r)
+        gradient.addColorStop(0, `rgba(79, 94, 255, ${0.04 + Math.sin(time * 0.5 + i) * 0.02})`)
+        gradient.addColorStop(0.7, 'rgba(139, 92, 246, 0.01)')
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)')
+        ctx.beginPath()
+        ctx.arc(x, y, r, 0, Math.PI * 2)
+        ctx.fillStyle = gradient
         ctx.fill()
       }
 
@@ -159,6 +275,8 @@ export default function AnimatedBackground() {
     return () => {
       cancelAnimationFrame(animationId)
       window.removeEventListener('resize', resize)
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('click', handleClick)
     }
   }, [])
 
@@ -166,7 +284,6 @@ export default function AnimatedBackground() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: 1 }}
     />
   )
 }

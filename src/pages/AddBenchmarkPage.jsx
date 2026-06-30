@@ -404,9 +404,6 @@ function ConfirmDuplicateStep({ existing, inputName, onAddToExisting, onCreateNe
 // ─── Step 3: Benchmark form ───────────────────────────────────────────────────
 function BenchmarkFormStep({ model, onDone, onBack }) {
   const currentUser = auth.currentUser
-  const defaultAddedBy = currentUser
-    ? (currentUser.displayName || currentUser.email || '')
-    : ''
 
   const [form, setForm] = useState({
     latency: '',
@@ -414,9 +411,9 @@ function BenchmarkFormStep({ model, onDone, onBack }) {
     dataset: '',
     datasetType: '',
     hardwareInfo: '',
+    inferenceCode: '',
     architectureUnderstanding: '',
     notes: '',
-    addedBy: defaultAddedBy,
     tags: '',
     // Fine-tuning specific fields
     baseModel: '',
@@ -440,6 +437,8 @@ function BenchmarkFormStep({ model, onDone, onBack }) {
   const hardwareValidation = useAIFieldValidation('hardwareInfo', form.hardwareInfo)
   const baseModelValidation = useAIFieldValidation('baseModel', form.baseModel)
   const architectureValidation = useAIFieldValidation('architectureUnderstanding', form.architectureUnderstanding)
+  const notesValidation = useAIFieldValidation('notes', form.notes)
+  const tagsValidation = useAIFieldValidation('tags', form.tags)
 
   function set(field, value) {
     setForm(f => ({ ...f, [field]: value }))
@@ -462,12 +461,16 @@ function BenchmarkFormStep({ model, onDone, onBack }) {
     (form.dataset.trim().length >= 3 && datasetValidation.validating) ||
     (form.hardwareInfo.trim().length >= 3 && hardwareValidation.validating) ||
     (form.architectureUnderstanding.trim().length >= 3 && architectureValidation.validating) ||
+    (form.notes.trim().length >= 3 && notesValidation.validating) ||
+    (form.tags.trim().length >= 3 && tagsValidation.validating) ||
     (isFinetunedModel && form.baseModel.trim().length >= 3 && baseModelValidation.validating)
 
   const hasValidationWarnings = 
     (form.dataset.trim() && datasetValidation.warning) ||
     (form.hardwareInfo.trim() && hardwareValidation.warning) ||
     (form.architectureUnderstanding.trim() && architectureValidation.warning) ||
+    (form.notes.trim() && notesValidation.warning) ||
+    (form.tags.trim() && tagsValidation.warning) ||
     (isFinetunedModel && form.baseModel.trim() && baseModelValidation.warning)
 
   // Check if required fields are filled
@@ -501,10 +504,11 @@ function BenchmarkFormStep({ model, onDone, onBack }) {
         dataset:                    form.dataset.trim(),
         datasetType:                form.datasetType,
         hardwareInfo:               form.hardwareInfo.trim(),
+        inferenceCode:              form.inferenceCode.trim(),
         architectureUnderstanding:  form.architectureUnderstanding.trim(),
         notes:                      form.notes.trim(),
-        addedBy:                    form.addedBy.trim(),
-        addedByUid:                 auth.currentUser?.uid || null,
+        addedBy:                    currentUser?.displayName || currentUser?.email || '',
+        addedByUid:                 currentUser?.uid || null,
         tags,
         // Fine-tuning fields (only saved when applicable)
         ...(isFinetunedModel && {
@@ -764,15 +768,22 @@ function BenchmarkFormStep({ model, onDone, onBack }) {
                 </div>
               )}
             </div>
-            <div>
-              <label className="label">Added By</label>
-              <input
-                value={form.addedBy}
-                onChange={e => set('addedBy', e.target.value)}
-                placeholder="Your name or team"
-                className="input"
+            <div className="sm:col-span-2">
+              <label className="label flex items-center gap-1.5">
+                <code className="text-brand-400 text-xs">&lt;/&gt;</code>
+                Inference Code
+              </label>
+              <textarea
+                rows={6}
+                value={form.inferenceCode}
+                onChange={e => set('inferenceCode', e.target.value)}
+                placeholder={`# Paste your inference code here\nimport torch\nfrom model import MyModel\n\nmodel = MyModel.load("checkpoint.pt")\nresult = model.predict(input_data)`}
+                className="input resize-none font-mono text-sm"
+                spellCheck={false}
               />
-              <p className="text-xs text-gray-500 mt-1">Auto-filled from your account</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Paste the code snippet used to run inference with this model. Helps others reproduce the benchmark.
+              </p>
             </div>
             <div className="sm:col-span-2">
               <label className="label flex items-center gap-1.5">
@@ -805,25 +816,51 @@ function BenchmarkFormStep({ model, onDone, onBack }) {
             </div>
             <div className="sm:col-span-2">
               <label className="label">Tags (comma-separated)</label>
-              <input
-                value={form.tags}
-                onChange={e => set('tags', e.target.value)}
-                placeholder="e.g. production, edge-device, low-light"
-                className="input"
-              />
+              <div className="relative">
+                <input
+                  value={form.tags}
+                  onChange={e => set('tags', e.target.value)}
+                  placeholder="e.g. production, edge-device, low-light"
+                  className="input"
+                />
+                {tagsValidation.validating && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <Loader2 size={16} className="animate-spin text-brand-400" />
+                  </div>
+                )}
+              </div>
+              {tagsValidation.warning && (
+                <div className="flex items-start gap-2 mt-2 p-2 rounded-lg bg-orange-500/5 border border-orange-500/20">
+                  <AlertTriangle size={14} className="text-orange-400 shrink-0 mt-0.5" />
+                  <p className="text-xs text-orange-300">{tagsValidation.warning}</p>
+                </div>
+              )}
               <p className="text-xs text-gray-500 mt-1">
                 Use-case or scenario tags for this specific run
               </p>
             </div>
             <div className="sm:col-span-2">
               <label className="label">Notes</label>
-              <textarea
-                rows={3}
-                value={form.notes}
-                onChange={e => set('notes', e.target.value)}
-                placeholder="Any additional context, preprocessing steps, or caveats…"
-                className="input resize-none"
-              />
+              <div className="relative">
+                <textarea
+                  rows={3}
+                  value={form.notes}
+                  onChange={e => set('notes', e.target.value)}
+                  placeholder="Any additional context, preprocessing steps, or caveats…"
+                  className="input resize-none"
+                />
+                {notesValidation.validating && (
+                  <div className="absolute right-3 top-3">
+                    <Loader2 size={16} className="animate-spin text-brand-400" />
+                  </div>
+                )}
+              </div>
+              {notesValidation.warning && (
+                <div className="flex items-start gap-2 mt-2 p-2 rounded-lg bg-orange-500/5 border border-orange-500/20">
+                  <AlertTriangle size={14} className="text-orange-400 shrink-0 mt-0.5" />
+                  <p className="text-xs text-orange-300">{notesValidation.warning}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
