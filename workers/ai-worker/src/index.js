@@ -148,6 +148,38 @@ Answer ONLY with one of these formats:
 - If NO (not real): "⚠️ ${value} is not a known model. [suggestion if applicable]"
 
 Be concise.`,
+
+    architectureUnderstanding: `A user submitted this as their "Architecture Understanding" for an AI model benchmark:
+"${value}"
+
+Is this a meaningful technical description of a model architecture? It should mention things like backbone type, layers, attention mechanisms, training strategy, loss functions, or design choices.
+
+Answer ONLY with one of these formats:
+- If YES (meaningful technical content): "✓ Valid architecture description."
+- If NO (gibberish/too vague/not technical): "⚠️ This doesn't appear to be a meaningful architecture description. Please describe the model's architecture (e.g., backbone, layers, training approach)."
+
+Be concise.`,
+
+    notes: `A user submitted this as "Notes" for an AI model benchmark entry:
+"${value}"
+
+Is this meaningful text that provides useful context about a benchmark run? It should be coherent English text.
+
+Answer ONLY with one of these formats:
+- If YES (meaningful): "✓ Valid notes."
+- If NO (gibberish/random characters): "⚠️ This doesn't appear to be meaningful notes. Please provide actual context about the benchmark run."
+
+Be concise.`,
+
+    tags: `A user submitted these as tags for an AI model benchmark: "${value}"
+
+Are these meaningful, relevant tags for an AI/ML benchmark? Tags should be descriptive words like "production", "edge-device", "low-light", "real-time", etc.
+
+Answer ONLY with one of these formats:
+- If YES (meaningful tags): "✓ Valid tags."
+- If NO (gibberish/meaningless): "⚠️ These don't appear to be meaningful tags. Use descriptive terms like 'production', 'edge-device', 'real-time'."
+
+Be concise.`,
   }
 
   const prompt = prompts[fieldName]

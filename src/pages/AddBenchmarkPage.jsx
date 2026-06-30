@@ -439,6 +439,7 @@ function BenchmarkFormStep({ model, onDone, onBack }) {
   const datasetValidation = useAIFieldValidation('dataset', form.dataset)
   const hardwareValidation = useAIFieldValidation('hardwareInfo', form.hardwareInfo)
   const baseModelValidation = useAIFieldValidation('baseModel', form.baseModel)
+  const architectureValidation = useAIFieldValidation('architectureUnderstanding', form.architectureUnderstanding)
 
   function set(field, value) {
     setForm(f => ({ ...f, [field]: value }))
@@ -460,11 +461,13 @@ function BenchmarkFormStep({ model, onDone, onBack }) {
   const isValidationPending = 
     (form.dataset.trim().length >= 3 && datasetValidation.validating) ||
     (form.hardwareInfo.trim().length >= 3 && hardwareValidation.validating) ||
+    (form.architectureUnderstanding.trim().length >= 3 && architectureValidation.validating) ||
     (isFinetunedModel && form.baseModel.trim().length >= 3 && baseModelValidation.validating)
 
   const hasValidationWarnings = 
     (form.dataset.trim() && datasetValidation.warning) ||
     (form.hardwareInfo.trim() && hardwareValidation.warning) ||
+    (form.architectureUnderstanding.trim() && architectureValidation.warning) ||
     (isFinetunedModel && form.baseModel.trim() && baseModelValidation.warning)
 
   // Check if required fields are filled
@@ -776,13 +779,26 @@ function BenchmarkFormStep({ model, onDone, onBack }) {
                 <Brain size={13} className="text-brand-400" />
                 Architecture Understanding *
               </label>
-              <textarea
-                rows={4}
-                value={form.architectureUnderstanding}
-                onChange={e => set('architectureUnderstanding', e.target.value)}
-                placeholder="Describe your understanding of this model's architecture — e.g. backbone type, training strategy, key design choices, loss functions, or anything notable about how the model works…"
-                className="input resize-none"
-              />
+              <div className="relative">
+                <textarea
+                  rows={4}
+                  value={form.architectureUnderstanding}
+                  onChange={e => set('architectureUnderstanding', e.target.value)}
+                  placeholder="Describe your understanding of this model's architecture — e.g. backbone type, training strategy, key design choices, loss functions, or anything notable about how the model works…"
+                  className="input resize-none"
+                />
+                {architectureValidation.validating && (
+                  <div className="absolute right-3 top-3">
+                    <Loader2 size={16} className="animate-spin text-brand-400" />
+                  </div>
+                )}
+              </div>
+              {architectureValidation.warning && (
+                <div className="flex items-start gap-2 mt-2 p-2 rounded-lg bg-orange-500/5 border border-orange-500/20">
+                  <AlertTriangle size={14} className="text-orange-400 shrink-0 mt-0.5" />
+                  <p className="text-xs text-orange-300">{architectureValidation.warning}</p>
+                </div>
+              )}
               <p className="text-xs text-gray-500 mt-1">
                 Explain the model architecture in your own words. This helps the team understand the submitter's depth of knowledge.
               </p>

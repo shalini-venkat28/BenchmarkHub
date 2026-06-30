@@ -139,9 +139,8 @@ export default function Sidebar({ models, open, onClose }) {
       className={`
         fixed lg:static inset-y-0 left-0 z-30
         w-64 shrink-0 bg-white/[0.02] backdrop-blur-2xl border-r border-white/[0.08]
-        flex flex-col
+        flex flex-col h-full
         transition-transform duration-300
-        lg:h-[calc(100vh-3.5rem)] lg:sticky lg:top-14
         ${open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}
     >

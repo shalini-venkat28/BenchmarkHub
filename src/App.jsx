@@ -56,7 +56,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col relative">
+    <div className="h-screen flex flex-col relative overflow-hidden">
       <AnimatedBackground />
       <Navbar
         user={user}
@@ -65,7 +65,7 @@ export default function App() {
         chatOpen={chatOpen}
       />
 
-      <div className="flex flex-1 overflow-hidden relative z-10">
+      <div className="flex flex-1 min-h-0 relative z-10">
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
           <div
