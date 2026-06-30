@@ -22,7 +22,11 @@ const CHART_COLORS = ['#7485ff', '#a78bfa', '#60a5fa', '#34d399', '#fbbf24', '#f
 
 export default function HomePage({ models }) {
   const stats = useMemo(() => {
-    const types = [...new Set(models.map(m => (m.type || 'other').toLowerCase()))]
+    const types = [...new Set(models.map(m => {
+      let t = (m.type || 'other').toLowerCase()
+      if (!TYPE_META[t]) t = 'other'
+      return t
+    }))]
     return {
       total: models.length,
       categories: types.length,
@@ -35,7 +39,11 @@ export default function HomePage({ models }) {
       .map(([type, meta]) => ({
         type,
         label: meta.label,
-        count: models.filter(m => (m.type || 'other').toLowerCase() === type).length,
+        count: models.filter(m => {
+          let t = (m.type || 'other').toLowerCase()
+          if (!TYPE_META[t]) t = 'other'
+          return t === type
+        }).length,
       }))
       .filter(d => d.count > 0),
     [models]
@@ -44,7 +52,9 @@ export default function HomePage({ models }) {
   const grouped = useMemo(() => {
     const map = {}
     for (const m of models) {
-      const t = (m.type || 'other').toLowerCase()
+      let t = (m.type || 'other').toLowerCase()
+      // Normalize to known types only — anything unrecognized goes to 'other'
+      if (!TYPE_META[t]) t = 'other'
       if (!map[t]) map[t] = []
       map[t].push(m)
     }

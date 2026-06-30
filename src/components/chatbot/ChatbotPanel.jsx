@@ -85,9 +85,9 @@ export default function ChatbotPanel({ models, onClose }) {
   }
 
   return (
-    <aside className="w-80 lg:w-96 shrink-0 bg-gray-900 border-l border-gray-800 flex flex-col animate-slide-in">
+    <aside className="w-80 lg:w-96 shrink-0 bg-white/[0.02] backdrop-blur-2xl border-l border-white/[0.08] flex flex-col animate-slide-in">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 h-14 border-b border-gray-800">
+      <div className="flex items-center gap-3 px-4 h-14 border-b border-white/[0.08]">
         <div className="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center">
           <Sparkles size={14} className="text-white" />
         </div>
@@ -140,7 +140,7 @@ export default function ChatbotPanel({ models, onClose }) {
       )}
 
       {/* Input */}
-      <div className="p-3 border-t border-gray-800">
+      <div className="p-3 border-t border-white/[0.08]">
         <div className="flex gap-2">
           <textarea
             ref={inputRef}

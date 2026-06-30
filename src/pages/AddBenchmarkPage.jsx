@@ -102,13 +102,29 @@ export default function AddBenchmarkPage({ models }) {
     }
   }, [preselectedSlug, models])
 
-  // Fuzzy match against existing models
+  // Fuzzy match against existing models — catches near-duplicates
   function findExistingMatch(name) {
-    const norm = name.toLowerCase().replace(/[\s\-_.]/g, '')
-    return models.find(m =>
-      m.name.toLowerCase().replace(/[\s\-_.]/g, '') === norm ||
-      m.slug === toSlug(name)
-    )
+    const norm = name.toLowerCase().replace(/[\s\-_.\/]/g, '')
+    
+    for (const m of models) {
+      const mNorm = m.name.toLowerCase().replace(/[\s\-_.\/]/g, '')
+      
+      // Exact normalized match
+      if (mNorm === norm) return m
+      
+      // Slug match
+      if (m.slug === toSlug(name)) return m
+      
+      // One contains the other (e.g., "Tesseract OCR" contains "Tesseract")
+      if (norm.includes(mNorm) || mNorm.includes(norm)) return m
+      
+      // Version-agnostic match (e.g., "YOLOv8" and "YOLOv8n")
+      const baseNorm = norm.replace(/v?\d+.*$/, '')
+      const baseMNorm = mNorm.replace(/v?\d+.*$/, '')
+      if (baseNorm.length >= 4 && baseNorm === baseMNorm) return m
+    }
+    
+    return null
   }
 
   function handleContinue() {

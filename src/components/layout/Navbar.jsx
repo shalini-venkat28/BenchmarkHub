@@ -67,7 +67,7 @@ export default function Navbar({ user, onMenuToggle, onChatToggle, chatOpen }) {
   const displayEmail = user?.email || ''
 
   return (
-    <header className="sticky top-0 z-30 bg-white/[0.03] backdrop-blur-2xl border-b border-white/[0.08]">
+    <header className="sticky top-0 z-40 bg-white/[0.03] backdrop-blur-2xl border-b border-white/[0.08] relative">
       <div className="max-w-screen-2xl mx-auto px-4 h-14 flex items-center gap-4">
         {/* Mobile hamburger */}
         <button
@@ -96,10 +96,10 @@ export default function Navbar({ user, onMenuToggle, onChatToggle, chatOpen }) {
               <Link
                 key={to}
                 to={to}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                   active
-                    ? 'bg-brand-600/20 text-brand-400'
-                    : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
+                    ? 'bg-brand-600/20 text-brand-400 border border-brand-500/30'
+                    : 'text-gray-400 hover:text-gray-200 hover:bg-white/[0.06]'
                 }`}
               >
                 <Icon size={15} />
@@ -142,7 +142,7 @@ export default function Navbar({ user, onMenuToggle, onChatToggle, chatOpen }) {
         <div className="relative">
           <button
             onClick={() => setUserMenuOpen(v => !v)}
-            className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-gray-400 hover:text-gray-200 hover:bg-gray-800 transition-colors"
+            className="flex items-center gap-2 px-2 py-1.5 rounded-xl text-sm text-gray-400 hover:text-gray-200 hover:bg-white/[0.06] transition-all duration-200"
             aria-label="User menu"
           >
             <div className="w-6 h-6 bg-brand-600/30 rounded-full flex items-center justify-center">
@@ -156,30 +156,30 @@ export default function Navbar({ user, onMenuToggle, onChatToggle, chatOpen }) {
             <>
               {/* Backdrop */}
               <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-              <div className="absolute right-0 top-full mt-1 w-56 bg-gray-900 border border-gray-800 rounded-xl shadow-xl z-50 overflow-hidden">
-                <div className="px-4 py-3 border-b border-gray-800">
+              <div className="absolute right-0 top-full mt-1 w-56 glass-strong z-50 overflow-hidden">
+                <div className="px-4 py-3 border-b border-white/[0.08]">
                   <p className="text-sm font-medium text-white truncate">{displayName}</p>
                   <p className="text-xs text-gray-500 truncate">{displayEmail}</p>
                 </div>
                 <button
                   onClick={handleExport}
                   disabled={exporting}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:text-gray-200 hover:bg-gray-800 transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:text-gray-200 hover:bg-white/[0.06] transition-colors"
                 >
                   <Download size={14} />
                   {exporting ? 'Exporting…' : 'Export All Data'}
                 </button>
                 <button
                   onClick={downloadTemplate}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:text-gray-200 hover:bg-gray-800 transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:text-gray-200 hover:bg-white/[0.06] transition-colors"
                 >
                   <FileSpreadsheet size={14} />
                   Download Template
                 </button>
-                <div className="border-t border-gray-800" />
+                <div className="border-t border-white/[0.08]" />
                 <button
                   onClick={() => { setUserMenuOpen(false); logOut() }}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-gray-800 transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-white/[0.06] transition-colors"
                 >
                   <LogOut size={14} />
                   Sign Out

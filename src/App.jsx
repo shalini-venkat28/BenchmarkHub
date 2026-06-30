@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import Navbar from './components/layout/Navbar'
 import Sidebar from './components/layout/Sidebar'
 import ChatbotPanel from './components/chatbot/ChatbotPanel'
+import AnimatedBackground from './components/AnimatedBackground'
 import HomePage from './pages/HomePage'
 import ModelDetailPage from './pages/ModelDetailPage'
 import AddBenchmarkPage from './pages/AddBenchmarkPage'
@@ -34,8 +35,9 @@ export default function App() {
   // Loading splash while Firebase resolves auth state
   if (user === undefined) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="flex items-center gap-3 text-gray-500">
+      <div className="min-h-screen flex items-center justify-center">
+        <AnimatedBackground />
+        <div className="glass p-8 flex items-center gap-3 text-gray-400 relative z-10">
           <div className="w-5 h-5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
           <span className="text-sm">Loading…</span>
         </div>
@@ -45,11 +47,17 @@ export default function App() {
 
   // Not logged in → show auth page
   if (!user) {
-    return <AuthPage />
+    return (
+      <>
+        <AnimatedBackground />
+        <AuthPage />
+      </>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col">
+    <div className="min-h-screen flex flex-col relative">
+      <AnimatedBackground />
       <Navbar
         user={user}
         onMenuToggle={() => setSidebarOpen(v => !v)}
@@ -57,11 +65,11 @@ export default function App() {
         chatOpen={chatOpen}
       />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative z-10">
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/60 z-20 lg:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-20 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
