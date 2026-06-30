@@ -116,7 +116,7 @@ export default function AnimatedBackground() {
       const mouse = mouseRef.current
 
       // ─── Draw subtle grid lines ────────────────────────────────────────
-      ctx.strokeStyle = 'rgba(116, 133, 255, 0.03)'
+      ctx.strokeStyle = 'rgba(116, 133, 255, 0.06)'
       ctx.lineWidth = 0.5
       for (let c = 0; c <= cols; c++) {
         ctx.beginPath()
@@ -139,7 +139,7 @@ export default function AnimatedBackground() {
         const mouseInfluence = Math.max(0, 1 - dist / 200)
 
         const pulse = Math.sin(time * 2 + node.phase) * 0.5 + 0.5
-        const baseAlpha = node.type === 'hub' ? 0.4 : 0.15
+        const baseAlpha = node.type === 'hub' ? 0.6 : 0.25
         const alpha = baseAlpha + pulse * 0.2 + mouseInfluence * 0.5
 
         const r = node.size + mouseInfluence * 3
@@ -255,11 +255,11 @@ export default function AnimatedBackground() {
       for (let i = 0; i < 5; i++) {
         const x = (Math.sin(time * 0.3 + i * 1.5) * 0.5 + 0.5) * canvas.width
         const y = (Math.cos(time * 0.2 + i * 2.1) * 0.5 + 0.5) * canvas.height
-        const r = 60 + Math.sin(time + i) * 20
+        const r = 80 + Math.sin(time + i) * 25
 
         const gradient = ctx.createRadialGradient(x, y, 0, x, y, r)
-        gradient.addColorStop(0, `rgba(79, 94, 255, ${0.04 + Math.sin(time * 0.5 + i) * 0.02})`)
-        gradient.addColorStop(0.7, 'rgba(139, 92, 246, 0.01)')
+        gradient.addColorStop(0, `rgba(79, 94, 255, ${0.07 + Math.sin(time * 0.5 + i) * 0.03})`)
+        gradient.addColorStop(0.7, 'rgba(139, 92, 246, 0.02)')
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0)')
         ctx.beginPath()
         ctx.arc(x, y, r, 0, Math.PI * 2)
